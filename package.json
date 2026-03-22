@@ -1,0 +1,28 @@
+{
+  "name": "soul-keeper",
+  "version": "1.0.0",
+  "description": "A CLI tool to help developers create, manage and sync their soul.md files",
+  "main": "src/index.js",
+  "bin": {
+    "soul": "./bin/soul"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "soul",
+    "ai",
+    "developer",
+    "cli"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^14.0.3",
+    "inquirer": "^13.3.2",
+    "ora": "^9.3.0",
+    "simple-git": "^3.33.0"
+  }
+}
