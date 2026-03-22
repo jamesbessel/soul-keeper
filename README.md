@@ -1,84 +1,154 @@
-# Soul Keeper
+# Soul Keeper 🔮
 
-A CLI tool that helps developers create, manage and sync their soul.md files.
+> The CLI tool for developers who want their AI coding assistants to truly understand them.
+
+[![npm version](https://img.shields.io/npm/v/soul-keeper.svg)](https://www.npmjs.com/package/soul-keeper)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+
+## What is soul.md?
+
+soul.md is a markdown file that gives your AI coding assistant a personality, values and working philosophy. Instead of re-explaining yourself every session, your AI always knows:
+
+- How you like to work
+- What tools and tech stack you prefer
+- Your coding values and standards
+- Your current projects and context
+
+Think of it as a **constitution for your AI** — a persistent set of principles that makes every coding session more productive and personalized.
+
+## What is Soul Keeper?
+
+Soul Keeper is a CLI tool that helps you:
+
+- **Create** a comprehensive soul.md through guided prompts
+- **Manage** multiple souls — one base soul plus project-specific extensions
+- **Sync** your soul files to GitHub so they're available everywhere
+- **Display** your soul beautifully in the terminal
 
 ## Installation
-
 ```bash
 npm install -g soul-keeper
 ```
 
-## Usage
-
-### `soul init`
-Create your base soul.md with interactive guided prompts. The tool asks about:
-- Name and location
-- Technical background and experience level
-- Core development values
-- Preferred tools and tech stack
-- Working style preferences
-- Current projects
-- AI collaboration preferences
-
-### `soul show`
-Display your soul.md in the terminal with nice formatting.
-
+## Quick Start
 ```bash
-soul show              # Show base soul
-soul show <project>    # Show project-specific soul
+# Create your base soul.md
+soul init
+
+# View your soul
+soul show
+
+# Check status
+soul status
 ```
 
-### `soul edit`
-Open soul.md in your default editor.
+## Commands
 
-```bash
-soul edit              # Edit base soul
-soul edit <project>    # Edit project-specific soul
+| Command | Description |
+|---------|-------------|
+| `soul init` | Create your base soul.md with guided prompts |
+| `soul show` | Display your soul.md with beautiful formatting |
+| `soul show <project>` | Display a project-specific soul |
+| `soul edit` | Open soul.md in your default editor |
+| `soul edit <project>` | Edit a project-specific soul |
+| `soul extend <project>` | Create a project-specific soul extension |
+| `soul push` | Git add, commit and push soul.md to GitHub |
+| `soul push <project>` | Push a project-specific soul |
+| `soul list` | List all soul files |
+| `soul status` | Show soul file status and last modified dates |
+
+## Soul Inheritance
+
+Soul Keeper supports a base + project soul model — similar to class inheritance in programming:
+```
+~/.soul/soul.md              ← your base soul (universal values)
+~/.soul/myproject-soul.md    ← project soul (extends base)
+~/.soul/schwab-soul.md       ← another project soul
 ```
 
-### `soul extend <project>`
-Create a project-specific soul extension that inherits from your base soul. This captures what's unique about a specific project.
+Your base soul captures who you are as a developer. Project souls capture what's unique about each project — specific tech stack, architecture decisions, team conventions.
 
-### `soul push`
-Git add, commit and push your soul.md to GitHub.
+## Usage with AI Coding Assistants
 
-```bash
-soul push              # Push base soul
-soul push <project>    # Push project-specific soul
+### OpenCode
+Place soul.md in your project root and OpenCode reads it automatically.
+
+### Claude
+Reference your soul.md at the start of each session:
+```
+Please read soul.md before we begin.
 ```
 
-### `soul list`
-Show all soul files (base + project extensions).
-
-### `soul status`
-Show which soul files exist and when they were last updated.
+### Any AI Assistant
+Simply include your soul.md content in your system prompt or at the start of conversations.
 
 ## Soul Files Location
 
 All soul files are stored in `~/.soul/` by default:
-- Base soul: `~/.soul/soul.md`
-- Project souls: `~/.soul/<project>-soul.md`
+```
+~/.soul/
+├── soul.md                  ← your base soul
+├── myproject-soul.md        ← project specific
+└── anotherproject-soul.md   ← another project
+```
 
-## Commands Overview
+## Example soul.md
+```markdown
+# My Soul
 
-| Command | Description |
-|---------|-------------|
-| `soul init` | Create your base soul.md |
-| `soul show` | Display soul.md with formatting |
-| `soul edit` | Open soul.md in your editor |
-| `soul extend <project>` | Create project-specific soul |
-| `soul push` | Git add, commit and push to GitHub |
-| `soul list` | List all soul files |
-| `soul status` | Show soul file status |
-| `soul --version` | Show version |
-| `soul --help` | Show help |
+## Who I am
+- Full stack developer based in Michigan
+- Prefer clean systems over clever hacks
+- Learning modern Python development
 
-## Requirements
+## Core Values
+- Security first, always
+- Test before shipping
+- Readable over clever
 
-- Node.js 14.0 or higher
-- Git (for the push command)
-- A code editor (for the edit command)
+## Toolchain
+- Python → uv for package management
+- Hosting → Render
+- Version control → GitHub
+
+## Working with AI
+- Claude for architecture and brainstorming
+- OpenCode for implementation
+- Always review AI output critically
+```
+
+## Why soul.md Matters
+
+AI coding assistants are becoming core to modern development workflows. But every new session starts cold — the AI doesn't know your preferences, your stack, your values or your projects.
+
+soul.md solves this by giving your AI a persistent identity that travels with you across every project and session.
+
+## Contributing
+
+Contributions welcome! Soul Keeper is open source and community driven.
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'added amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## Roadmap
+
+- [ ] Web app for mobile soul editing
+- [ ] Community soul library — browse and fork other developers' souls
+- [ ] VS Code extension
+- [ ] Auto-detect project type and suggest soul extensions
+- [ ] Soul versioning and history
+
+## Author
+
+James Bessel — [@jamesbessel](https://github.com/jamesbessel)
 
 ## License
 
-ISC
+ISC — free for personal and commercial use.
+
+---
+
+*"Know thyself — then teach your AI."*
