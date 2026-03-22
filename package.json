@@ -4,7 +4,7 @@
   "description": "A CLI tool to help developers create, manage and sync their soul.md files",
   "main": "src/index.js",
   "bin": {
-    "soul": "./bin/soul"
+    "soul": "bin/soul"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
