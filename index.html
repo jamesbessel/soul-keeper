@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>agentic soulkeeper™ — CLI soul.md design and management</title>
+  <meta name="description" content="CLI soul.md design and management system for agentic programming. Give your AI a conscience.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-tertiary: #1a1a25;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0b0;
+      --text-muted: #606070;
+      --accent: #00d4ff;
+      --accent-dim: rgba(0, 212, 255, 0.15);
+      --accent-glow: rgba(0, 212, 255, 0.4);
+      --border: rgba(255, 255, 255, 0.08);
+      --gradient-start: #00d4ff;
+      --gradient-end: #7b2dff;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 0;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .nav-logo svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .logo-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 40px;
+    }
+
+    .logo-orbit {
+      position: absolute;
+      inset: 0;
+      animation: rotate 20s linear infinite;
+    }
+
+    .logo-orbit ellipse {
+      fill: none;
+      stroke: url(#logoGradient);
+      stroke-width: 2;
+      opacity: 0.6;
+    }
+
+    .logo-ai {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 72px;
+      font-weight: 800;
+      font-style: italic;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .logo-dot.top {
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .logo-dot.bottom {
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .hero-brand {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 8vw, 72px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-tagline {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      font-weight: 400;
+    }
+
+    .install-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 24px;
+      margin-bottom: 32px;
+    }
+
+    .install-box code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: var(--bg-primary);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-secondary);
+      border-color: var(--text-muted);
+    }
+
+    /* What is soul.md Section */
+    .section {
+      padding: 100px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .concept-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s;
+    }
+
+    .concept-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+
+    .concept-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-dim);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .concept-card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .concept-card p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .quote-block {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px;
+      text-align: center;
+      margin-top: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quote-block::before {
+      content: '"';
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      font-size: 120px;
+      font-weight: 800;
+      color: var(--accent);
+      opacity: 0.1;
+      line-height: 1;
+    }
+
+    .quote-block p {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 500;
+      font-style: italic;
+      color: var(--text-primary);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* How it works Section */
+    .steps-section {
+      background: var(--bg-secondary);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+    }
+
+    .step-card {
+      position: relative;
+      padding: 40px 32px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+
+    .step-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .step-number {
+      position: absolute;
+      top: -16px;
+      left: 32px;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: var(--bg-primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .step-command {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: var(--accent);
+      margin-bottom: 16px;
+      margin-top: 16px;
+    }
+
+    .step-card h3 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .step-card p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    /* Commands Section */
+    .commands-table {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .command-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .command-row:last-child {
+      border-bottom: none;
+    }
+
+    .command-row:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .command-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      color: var(--accent);
+    }
+
+    .command-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 60px 0;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .footer-tagline {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 32px;
+      font-style: italic;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .footer-credit {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .footer-credit a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .footer-credit a:hover {
+      color: var(--accent);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding: 100px 24px 60px;
+      }
+
+      .logo-container {
+        width: 150px;
+        height: 150px;
+      }
+
+      .logo-ai {
+        font-size: 54px;
+      }
+
+      .install-box {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .command-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="container">
+      <a href="#" class="nav-logo">
+        <svg viewBox="0 0 32 32" fill="none">
+          <ellipse cx="16" cy="16" rx="14" ry="8" stroke="url(#navGrad)" stroke-width="2"/>
+          <text x="10" y="20" font-family="Inter" font-weight="800" font-style="italic" font-size="12" fill="url(#navGrad)">ai</text>
+          <defs>
+            <linearGradient id="navGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00d4ff"/>
+              <stop offset="100%" stop-color="#7b2dff"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        agentic soulkeeper™
+      </a>
+      <ul class="nav-links">
+        <li><a href="#what">What is soul.md</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#commands">Commands</a></li>
+        <li><a href="https://github.com/jamesbessel/soul-keeper" target="_blank">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="logo-container">
+      <svg class="logo-orbit" viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00d4ff"/>
+            <stop offset="100%" stop-color="#7b2dff"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="100" rx="90" ry="45" />
+      </svg>
+      <div class="logo-ai">ai</div>
+      <div class="logo-dot top"></div>
+      <div class="logo-dot bottom"></div>
+    </div>
+    
+    <div class="hero-brand">agentic soulkeeper™</div>
+    <h1>Know thyself — <span>then teach your AI.</span></h1>
+    <p class="hero-tagline">CLI soul.md design and management system for agentic programming</p>
+    
+    <div class="install-box">
+      <code>npm install -g soul-keeper</code>
+      <button class="copy-btn" onclick="copyInstall()">Copy</button>
+    </div>
+    
+    <div class="hero-buttons">
+      <a href="https://github.com/jamesbessel/soul-keeper" class="btn btn-primary" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+        View on GitHub
+      </a>
+      <a href="https://www.npmjs.com/package/soul-keeper" class="btn btn-secondary" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M0 0v24h24V0H0zm19.2 19.2c0 .6-.4 1.2-1 1.2H5.8c-.6 0-1-.6-1-1.2v-12c0-.6.4-1.2 1-1.2h12.4c.6 0 1 .6 1 1.2v12z"/>
+          <path d="M8 12h8v1H8z"/>
+        </svg>
+        View on npm
+      </a>
+    </div>
+  </section>
+
+  <!-- What is soul.md Section -->
+  <section id="what" class="section">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">The Concept</p>
+        <h2 class="section-title">What is soul.md?</h2>
+        <p class="section-desc">A persistent conscience for your AI coding assistant</p>
+      </div>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="concept-icon">🧠</div>
+          <h3>Your Developer Identity</h3>
+          <p>A markdown file that captures who you are as a developer — your values, preferences, working style, and technical philosophy. The same way you'd onboard a human colleague.</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🤖</div>
+          <h3>AI Context & Memory</h3>
+          <p>Give your AI assistant persistent context that survives across sessions. No more repeating "I prefer TypeScript" or "I always write tests first" every single conversation.</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🎯</div>
+          <h3>Project-Specific Souls</h3>
+          <p>Create project extensions that capture what makes each project unique — the tech stack, architecture decisions, team dynamics, and special requirements.</p>
+        </div>
+      </div>
+
+      <div class="quote-block">
+        <p>Give your AI a conscience — a persistent set of values and principles that guides every coding session</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works Section -->
+  <section id="how" class="section steps-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Getting Started</p>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-desc">Three simple commands to establish your AI's conscience</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-command">soul init</div>
+          <h3>Create Your Soul</h3>
+          <p>Interactive prompts help you build a comprehensive soul.md covering your identity, values, tech stack, working style, and AI collaboration preferences.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-command">soul extend</div>
+          <h3>Project Extensions</h3>
+          <p>For each project, create a specialized soul that inherits your base while capturing what makes that project unique. Perfect for different tech stacks and team dynamics.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-command">soul push</div>
+          <h3>Sync Everywhere</h3>
+          <p>Push your soul to GitHub and access it from any machine. Your AI's conscience follows you across all your development environments.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Commands Section -->
+  <section id="commands" class="section">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Reference</p>
+        <h2 class="section-title">All Commands</h2>
+        <p class="section-desc">Everything you need to manage your soul</p>
+      </div>
+
+      <div class="commands-table">
+        <div class="command-row">
+          <span class="command-name">soul init</span>
+          <span class="command-desc">Create your base soul.md with interactive prompts</span>
+        </div>
+        <div class="command-row">
+          <span class="command-name">soul show</span>
+          <span class="command-desc">Display your soul.md with beautiful terminal formatting</span>
+        </div>
+        <div class="command-row">
+          <span class="command-name">soul edit</span>
+          <span class="command-desc">Open soul.md in your default editor for quick changes</span>
+        </div>
+        <div class="command-row">
+          <span class="command-name">soul extend</span>
+          <span class="command-desc">Create a project-specific soul extension with symlink support</span>
+        </div>
+        <div class="command-row">
+          <span class="command-name">soul link</span>
+          <span class="command-desc">Create symlink to a project soul in your current directory</span>
+        </div>
+        <div class="command-row">
+          <span class="command-name">soul push</span>
+          <span class="command-desc">Git add, commit and push soul.md to GitHub</span>
+        </div>
+        <div class="command-row">
+          <span class="command-name">soul list</span>
+          <span class="command-desc">Show all soul files (base + project extensions)</span>
+        </div>
+        <div class="command-row">
+          <span class="command-name">soul status</span>
+          <span class="command-desc">Display which soul files exist and when they were last updated</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-logo">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" style="vertical-align: middle; margin-right: 8px;">
+          <ellipse cx="16" cy="16" rx="14" ry="8" stroke="url(#footerGrad)" stroke-width="2"/>
+          <text x="10" y="20" font-family="Inter" font-weight="800" font-style="italic" font-size="12" fill="url(#footerGrad)">ai</text>
+          <defs>
+            <linearGradient id="footerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00d4ff"/>
+              <stop offset="100%" stop-color="#7b2dff"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        agentic soulkeeper™
+      </div>
+      <p class="footer-tagline">"Know thyself — then teach your AI."</p>
+      <div class="footer-links">
+        <a href="https://github.com/jamesbessel/soul-keeper" target="_blank">GitHub</a>
+        <a href="https://www.npmjs.com/package/soul-keeper" target="_blank">npm</a>
+      </div>
+      <p class="footer-credit">
+        Made with care by <a href="https://github.com/jamesbessel" target="_blank">@jamesbessel</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    function copyInstall() {
+      const code = document.querySelector('.install-box code');
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        btn.style.background = '#00d4ff';
+        btn.style.color = '#0a0a0f';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 2000);
+      });
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
