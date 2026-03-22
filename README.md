@@ -2,6 +2,8 @@
 
 > The CLI tool for developers who want their AI coding assistants to truly understand them.
 
+🌐 [soulkeeper landing page](https://jamesbessel.github.io/soul-keeper/)
+
 [![npm version](https://img.shields.io/npm/v/soul-keeper.svg)](https://www.npmjs.com/package/soul-keeper)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
