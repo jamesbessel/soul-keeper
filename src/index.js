@@ -321,6 +321,56 @@ async function editSoul(project) {
   });
 }
 
+async function createSymlink(projectFile, project) {
+  const symlinkPath = path.join(process.cwd(), 'soul.md');
+  let symlinkCreated = false;
+  let gitignoreUpdated = false;
+  
+  if (fs.existsSync(symlinkPath)) {
+    const stats = fs.lstatSync(symlinkPath);
+    if (stats.isSymbolicLink()) {
+      fs.unlinkSync(symlinkPath);
+      symlinkCreated = true;
+    } else {
+      const { replace } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'replace',
+          message: 'A soul.md already exists here. Replace with symlink?',
+          default: false
+        }
+      ]);
+      
+      if (!replace) {
+        console.log(chalk.yellow('Skipped symlink creation.'));
+        return { symlinkCreated: false, gitignoreUpdated: false };
+      }
+      fs.unlinkSync(symlinkPath);
+      symlinkCreated = true;
+    }
+  } else {
+    symlinkCreated = true;
+  }
+  
+  if (symlinkCreated) {
+    fs.symlinkSync(projectFile, symlinkPath);
+  }
+  
+  const gitignorePath = path.join(process.cwd(), '.gitignore');
+  let gitignoreContent = '';
+  
+  if (fs.existsSync(gitignorePath)) {
+    gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+  }
+  
+  if (!gitignoreContent.includes('soul.md')) {
+    fs.appendFileSync(gitignorePath, '\nsoul.md\n');
+    gitignoreUpdated = true;
+  }
+  
+  return { symlinkCreated, gitignoreUpdated };
+}
+
 async function extendSoul(project) {
   if (!project) {
     console.log(chalk.red('Please specify a project name: soul extend <project>'));
@@ -461,6 +511,16 @@ async function extendSoul(project) {
   fs.writeFileSync(projectFile, projectContent);
   
   spinner.succeed(chalk.green(`Project soul created: ${projectFile}`));
+  
+  const { symlinkCreated, gitignoreUpdated } = await createSymlink(projectFile, project);
+  
+  if (symlinkCreated) {
+    console.log(chalk.green(`✔ Symlink created: ./soul.md → ${projectFile}`));
+  }
+  if (gitignoreUpdated) {
+    console.log(chalk.green('✔ Added soul.md to .gitignore'));
+  }
+  
   console.log(chalk.cyan(`\nUse "soul show ${project}" to view it or "soul edit ${project}" to modify it.\n`));
 }
 
@@ -668,6 +728,81 @@ async function statusSoul() {
   console.log(chalk.gray(`  Location: ${SOUL_DIR}\n`));
 }
 
+async function linkSoul(project) {
+  if (!project) {
+    console.log(chalk.red('Please specify a project name: soul link <project>'));
+    return;
+  }
+  
+  const projectFile = path.join(SOUL_DIR, `${project}-soul.md`);
+  
+  if (!fs.existsSync(projectFile)) {
+    console.log(chalk.red(`Project soul not found: ${projectFile}`));
+    console.log(chalk.gray(`Run "soul extend ${project}" first to create it.\n`));
+    return;
+  }
+  
+  const symlinkPath = path.join(process.cwd(), 'soul.md');
+  let symlinkCreated = false;
+  let gitignoreUpdated = false;
+  
+  if (fs.existsSync(symlinkPath)) {
+    const stats = fs.lstatSync(symlinkPath);
+    if (stats.isSymbolicLink()) {
+      const existingTarget = fs.readlinkSync(symlinkPath);
+      if (existingTarget === projectFile) {
+        console.log(chalk.yellow(`Already linked to: ${projectFile}`));
+        return;
+      }
+      fs.unlinkSync(symlinkPath);
+      symlinkCreated = true;
+    } else {
+      const { replace } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'replace',
+          message: 'A soul.md already exists here. Replace with symlink?',
+          default: false
+        }
+      ]);
+      
+      if (!replace) {
+        console.log(chalk.yellow('Aborted.'));
+        return;
+      }
+      fs.unlinkSync(symlinkPath);
+      symlinkCreated = true;
+    }
+  } else {
+    symlinkCreated = true;
+  }
+  
+  if (symlinkCreated) {
+    fs.symlinkSync(projectFile, symlinkPath);
+  }
+  
+  const gitignorePath = path.join(process.cwd(), '.gitignore');
+  let gitignoreContent = '';
+  
+  if (fs.existsSync(gitignorePath)) {
+    gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+  }
+  
+  if (!gitignoreContent.includes('soul.md')) {
+    fs.appendFileSync(gitignorePath, '\nsoul.md\n');
+    gitignoreUpdated = true;
+  }
+  
+  console.log(chalk.green(`✔ Project soul: ${projectFile}`));
+  if (symlinkCreated) {
+    console.log(chalk.green(`✔ Symlink created: ./soul.md → ${projectFile}`));
+  }
+  if (gitignoreUpdated) {
+    console.log(chalk.green('✔ Added soul.md to .gitignore'));
+  }
+  console.log('');
+}
+
 program
   .name('soul')
   .description('Soul Keeper - Create, manage and sync your soul.md files')
@@ -711,5 +846,11 @@ program
   .command('status')
   .description('Show which soul files exist and when they were last updated')
   .action(statusSoul);
+
+program
+  .command('link')
+  .description('Create symlink to project soul in current directory')
+  .argument('<project>', 'Project name')
+  .action(linkSoul);
 
 program.parse();

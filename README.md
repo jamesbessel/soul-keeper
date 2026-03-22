@@ -92,6 +92,17 @@ All soul files are stored in `~/.soul/` by default:
 └── anotherproject-soul.md   ← another project
 ```
 
+## How Soul Files Work
+
+soul.md in your project is a **symlink** — a pointer to your 
+project soul stored in ~/.soul/. Edit either location and 
+both update instantly. There is only ever ONE file.
+
+~/.soul/jbtest-soul.md    ← the real file
+/your-project/soul.md     ← points to the real file
+
+
+
 ## Example soul.md
 ```markdown
 # My Soul
