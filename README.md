@@ -32,8 +32,12 @@ npm install -g soul-keeper
 
 ## Quick Start
 ```bash
-# Create your base soul.md
+npm install -g soul-keeper
 soul init
+```
+
+Soul Keeper automatically creates `~/.soul/` on first run.
+No manual setup required.
 
 # View your soul
 soul show

@@ -190,8 +190,15 @@ async function initSoul() {
   fs.writeFileSync(SOUL_FILE, soulContent);
 
   spinner.succeed(chalk.green('soul.md created successfully!'));
-  console.log(chalk.cyan(`\nSaved to: ${SOUL_FILE}\n`));
-  console.log(chalk.gray('Use "soul show" to view it or "soul edit" to modify it.\n'));
+  console.log(chalk.bold.cyan('\n🔮 Your soul is ready!\n'));
+  console.log(chalk.white('Your soul is stored centrally at:'));
+  console.log(chalk.gray(`  ${SOUL_FILE}\n`));
+  console.log(chalk.white('This makes it available from ANY project on your Mac.\n'));
+  console.log(chalk.bold.white('Next steps:'));
+  console.log(chalk.gray('  soul show                → view your soul'));
+  console.log(chalk.gray('  soul extend <project>    → create a project soul'));
+  console.log(chalk.gray('  soul push                → sync to GitHub'));
+  console.log(chalk.gray('  soul --help              → see all commands\n'));
 }
 
 function generateSoulMarkdown(answers) {
@@ -512,13 +519,21 @@ async function extendSoul(project) {
   
   spinner.succeed(chalk.green(`Project soul created: ${projectFile}`));
   
-  const { symlinkCreated, gitignoreUpdated } = await createSymlink(projectFile, project);
+  const { createLink } = await inquirer.prompt([{
+    type: 'confirm',
+    name: 'createLink',
+    message: 'Create soul.md symlink here? (lets AI coding assistants find your soul automatically)',
+    default: true
+  }]);
   
-  if (symlinkCreated) {
-    console.log(chalk.green(`✔ Symlink created: ./soul.md → ${projectFile}`));
-  }
-  if (gitignoreUpdated) {
-    console.log(chalk.green('✔ Added soul.md to .gitignore'));
+  if (createLink) {
+    const { symlinkCreated, gitignoreUpdated } = await createSymlink(projectFile, project);
+    if (symlinkCreated) {
+      console.log(chalk.green(`✔ Symlink created: ./soul.md → ${projectFile}`));
+    }
+    if (gitignoreUpdated) {
+      console.log(chalk.green('✔ Added soul.md to .gitignore'));
+    }
   }
   
   console.log(chalk.cyan(`\nUse "soul show ${project}" to view it or "soul edit ${project}" to modify it.\n`));
@@ -592,9 +607,6 @@ async function pushSoul(project) {
   const projectName = project ? `${project} project ` : '';
   const fileName = path.basename(filePath);
   
-  const currentDir = process.cwd();
-  const gitDir = path.join(SOUL_DIR, '.git');
-  
   const git = simpleGit(SOUL_DIR);
   
   const spinner = ora('Checking Git repository...').start();
@@ -603,40 +615,65 @@ async function pushSoul(project) {
     const isRepo = await git.checkIsRepo();
     
     if (!isRepo) {
-      spinner.text = 'Initializing Git repository...';
-      await git.init();
+      spinner.stop();
+      console.log(chalk.red('\nNo git repository in ~/.soul/'));
+      console.log(chalk.yellow('\nTo set up git tracking:'));
+      console.log(chalk.gray('  cd ~/.soul'));
+      console.log(chalk.gray('  git init'));
+      console.log(chalk.gray('  git remote add origin <your-repo-url>'));
+      console.log(chalk.yellow('\nThen run "soul push" again.\n'));
+      return;
     }
     
     spinner.text = 'Adding soul file...';
     await git.add(fileName);
     
-    spinner.text = 'Committing...';
-    const { stdout: status } = await git.status();
+    spinner.text = 'Checking for changes...';
+    const status = await git.status();
     
-    if (status.includes('Changes to be committed') || status.includes('Untracked files')) {
-      await git.commit(`Update ${fileName}`);
-    } else {
+    if (status.staged.length === 0 && status.not_added.length === 0) {
       spinner.succeed(chalk.yellow('No changes to commit.'));
       return;
     }
+    
+    spinner.text = 'Committing...';
+    await git.commit(`Update ${fileName}`);
     
     spinner.text = 'Checking remote...';
     const remotes = await git.getRemotes();
     
     if (remotes.length === 0) {
       spinner.stop();
-      console.log(chalk.yellow('\nNo remote configured. Please add a remote:'));
-      console.log(chalk.gray(`  git remote add origin <your-repo-url>`));
-      console.log(chalk.gray(`  Then run "soul push" again.\n`));
+      console.log(chalk.red('\nNo remote configured.'));
+      console.log(chalk.yellow('\nAdd a remote:'));
+      console.log(chalk.gray(`  cd ${SOUL_DIR}`));
+      console.log(chalk.gray('  git remote add origin <your-repo-url>'));
+      console.log(chalk.yellow('\nThen run "soul push" again.\n'));
       return;
     }
     
     spinner.text = 'Pushing to remote...';
     await git.push();
     
-    spinner.succeed(chalk.green(`\n${projectName}soul pushed successfully!\n`));
+    const remoteUrl = (await git.remote(['get-url', remotes[0].name])).trim();
+    
+    spinner.succeed(chalk.green(`\n${projectName}soul pushed successfully!`));
+    console.log(chalk.green(`✔ Pushed to: ${remoteUrl}`));
+    console.log(chalk.gray('  Your soul is now available on any machine via soul pull\n'));
   } catch (error) {
-    spinner.fail(chalk.red(`Error: ${error.message}`));
+    spinner.stop();
+    if (error.message.includes('no upstream')) {
+      console.log(chalk.red('\nNo upstream branch configured.'));
+      console.log(chalk.yellow('\nSet upstream and push:'));
+      console.log(chalk.gray(`  cd ${SOUL_DIR}`));
+      console.log(chalk.gray('  git push -u origin main'));
+      console.log(chalk.yellow('\nThen run "soul push" again.\n'));
+    } else if (error.message.includes('Authentication failed') || error.message.includes('could not read')) {
+      console.log(chalk.red('\nAuthentication failed.'));
+      console.log(chalk.yellow('\nCheck your git credentials and try again.\n'));
+    } else {
+      console.log(chalk.red(`\nPush failed: ${error.message}\n`));
+    }
   }
 }
 
